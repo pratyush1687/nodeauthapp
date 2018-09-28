@@ -15,6 +15,8 @@ mongoose.connect(config.database, { useMongoClient: true, promiseLibrary: requir
 const app = express();
 
 const users = require('./routes/users');
+const crimes = require('./routes/crimes');
+const diseases = require('./routes/diseases');
 
 // Port Number
 const port = 3000;
@@ -35,6 +37,8 @@ app.use(passport.session());
 require('./config/passport')(passport);
 
 app.use('/users', users);
+app.use('/crimes',crimes);
+app.use('/diseases',diseases);
 
 // Index Route
 app.get('/', (req, res) => {

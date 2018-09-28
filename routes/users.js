@@ -8,10 +8,10 @@ const User = require('../models/user');
 // Register
 router.post('/register', (req, res, next) => {
   let newUser = new User({
-    name: req.body.name,
     email: req.body.email,
-    username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
+    location: {lat:req.body.loc.lat,lngg: req.body.loc.lng}
+
   });
 
   User.addUser(newUser, (err, user) => {
@@ -25,10 +25,10 @@ router.post('/register', (req, res, next) => {
 
 // Authenticate
 router.post('/authenticate', (req, res, next) => {
-  const username = req.body.username;
+  const email = req.body.email;
   const password = req.body.password;
 
-  User.getUserByUsername(username, (err, user) => {
+  User.getUserByUsername(email, (err, user) => {
     if(err) throw err;
     if(!user){
       return res.json({success: false, msg: 'User not found'});
@@ -62,5 +62,23 @@ router.post('/authenticate', (req, res, next) => {
 router.get('/profile', passport.authenticate('jwt', {session:false}), (req, res, next) => {
   res.json({user: req.user});
 });
+
+/**update location of user 
+ * 
+*/
+router.post('/updateLoc',passport.authenticate('jwt',{session:false}),(req,res,next)=>{
+  console.log(req.user);
+  
+  User.getUserById(req.user.id,(err,tempUser)=>{
+    if(err) res.json({success:false,msg:err.msg});
+    console.log(tempUser)
+    tempUser.location.lat = req.body.loc.lat;
+    tempUser.location.lngg = req.body.loc.lngg;
+    tempUser.save((err)=>{
+      if(err) throw err;
+      res.json({success:true,msg:`location updated for userid ${tempUser.id}`});
+    })
+  })
+})
 
 module.exports = router;
